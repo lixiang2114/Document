@@ -355,3 +355,52 @@ mongos> db.runCommand({addshard:'rs2/192.168.162.132:27019,192.168.162.133:27019
 mongos> sh.setBalancerState(true);
 mongos> exit;
 ```
+&#8203;
+
+#### 安装并对接Metabase报表系统  
+1. 下载JDK-1.8.271  
+wget https://github.com/lixiang2114/Software/raw/main/jdk-8u271-linux-x64.tar.gz  
+&#8203;
+2. 安装JDK-1.8.271  
+tar -zxvf jdk-8u271-linux-x64.tar.gz -C /software/jdk1.8.0_271  
+echo -e "JAVA_HOME=/software/jdk1.8.0_271\nPATH=$PATH:$JAVA_HOME/lib:$JAVA_HOME/bin\nexport PATH JAVA_HOME">>/etc/profile && source /etc/profile  
+&#8203;
+3. 下载MySql5.7  
+wget https://github.com/lixiang2114/Software/raw/main/mysql-5.7.23.zip  
+&#8203;
+4. 安装MySql5.7  
+unzip mysql-5.7.23.zip -d /software/  
+&#8203;
+5. 启动MySql服务  
+/software/mysql-5.7.23/sbin/MysqlTools start  
+lsof -i tcp:3306  
+COMMAND  PID  USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+mysqld  1559 mysql   29u  IPv6  23600      0t0  TCP *:mysql (LISTEN)  
+&#8203;
+6. 下载Metabase0.37  
+wget https://github.com/lixiang2114/Software/raw/main/metabase0.37.2.zip  
+&#8203;
+7. 安装Metabase0.37  
+unzip metabase0.37.2.zip -d /software/  
+&#8203;
+8. 启动Metabase服务
+/software/metabase0.37.2/bin/Startup.sh
+META_HOME: /software/metabase0.37.2
+lsof -i tcp:3000
+COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+java    1617 root   24u  IPv6  24808      0t0  TCP *:hbci (LISTEN)  
+&#8203;
+9. 测试Metabase服务是否正常  
+curl -Ik -X GET http://192.168.162.127:3000/  
+&#8203;
+##### 备注：  
+Metabase的默认端口是3000，若Curl命令返回HTTP状态码为200则说明Metabase服务已经安装成功了  
+若第一次使用浏览器访问Metabase服务则需要首先创建管理员用户才能进入Metabase主界面，进入主界面之后便可设置，进入主界面之后点击右上角的"设置"—>"管理员"—>"数据库"—>"添加数据库"，填写连接参数表单：  
+数据库类型：MongoDB  
+名字：MongoDB-MY3  
+连接字符串：mongodb://192.168.162.129:27017,192.168.162.130:27017,192.168.162.131:27017/MY3  
+最后点击保存即可创建好数据库连接，接下来可以点击右上角的"设置"—>"退出管理员"—>"浏览数据"—>"MongoDB-MY3"—>"ServerLog"即可查看服务端集合表中的日志数据  
+&#8203;
+10. 下载安装Nginx并对接Metabase报表服务（略）
+##### 备注：  
+当Nginx安装好并对接完Metabase报表服务之后，我们就可以在外网通过浏览器访问Nginx代理服务来访问Metabase服务，由于Metabase是无状态的服务，所以我们很容易通过Nginx代理同时实现Metabase服务的高可用和负载均衡  
